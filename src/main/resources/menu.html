@@ -17,16 +17,19 @@
     </style>
 </head>
 <body>
-    <svg width="800" height="600"></svg>
+    <svg width="800" height="800"></svg>
     <script>
         const width = 800;
-        const height = 600;
+        const height = 800;
         const numRows = 10;
         const numBalls = 200;
         const pinRadius = 5;
         const ballRadius = 3;
-        const containerHeight = 100;
+        const containerHeight = 200;
         const containerWidth = 10;
+        const gravity = 0.98;
+        const bounce = 0.6;
+        const friction = 0.01;
 
         const svg = d3.select("svg")
             .attr("width", width)
@@ -73,29 +76,53 @@
         function dropBall() {
             let x = width / 2;
             let y = 0;
+            let vy = 0;
+            let vx = (Math.random() - 0.5) * 2; // Random initial horizontal velocity
             const ball = svg.append("circle")
                 .attr("class", "ball")
                 .attr("cx", x)
                 .attr("cy", y)
                 .attr("r", ballRadius);
 
-            for (let row = 0; row < numRows; row++) {
-                setTimeout(() => {
-                    x += (Math.random() < 0.5 ? -1 : 1) * 10;
-                    y += 20;
-                    ball.attr("cx", x).attr("cy", y);
-                }, row * 100);
+            function updateBall() {
+                vy += gravity;
+                y += vy;
+                x += vx;
+
+                for (let pin of pins) {
+                    const dx = x - pin.x;
+                    const dy = y - pin.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < pinRadius + ballRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
+                        vy = Math.sin(angle) * bounce;
+
+                        // 50% chance to go left or right
+                        vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
+                        break;
+                    }
+                }
+
+                // Apply friction
+                vx *= (1 - friction);
+
+                ball.attr("cx", x).attr("cy", y);
+
+                if (y < height - containerHeight) {
+                    requestAnimationFrame(updateBall);
+                } else {
+                    const containerIndex = Math.floor((x - width / 2) / 20 + numRows / 2);
+                    const container = containers[Math.max(0, Math.min(containerIndex, containers.length - 1))];
+                    container.count += 1;
+                    ball.transition()
+                        .duration(500)
+                        .attr("cx", container.x)
+                        .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
+                }
             }
 
-            setTimeout(() => {
-                const containerIndex = Math.round((x - width / 2) / 20 + numRows / 2);
-                const container = containers[containerIndex];
-                container.count += 1;
-                ball.transition()
-                    .duration(500)
-                    .attr("cx", container.x)
-                    .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
-            }, numRows * 100);
+            updateBall();
         }
 
         for (let i = 0; i < numBalls; i++) {
