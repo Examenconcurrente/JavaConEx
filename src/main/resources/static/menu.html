@@ -14,18 +14,25 @@
         .container {
             fill: lightgray;
         }
+        .info {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <svg width="800" height="800"></svg>
+    <svg width="1600" height="1600"></svg>
+    <div class="info" id="ball-info"></div>
+    <button onclick="toggleAllBalls()">Show All Balls</button>
+    <div class="info" id="all-balls-info" style="display: none;"></div>
     <script>
-        const width = 800;
-        const height = 800;
-        const numRows = 10;
-        const numBalls = 200;
+        const width = 1600;
+        const height = 1600;
+        const numRows = 30;
         const pinRadius = 5;
         const ballRadius = 3;
-        const containerHeight = 200;
+        const containerHeight = 300;
         const containerWidth = 10;
         const gravity = 0.98;
         const bounce = 0.6;
@@ -73,7 +80,20 @@
             .attr("width", containerWidth)
             .attr("height", containerHeight);
 
-        function dropBall() {
+        const ballInfo = document.getElementById("ball-info");
+        const allBallsInfo = document.getElementById("all-balls-info");
+        const ballData = [];
+        const allBallData = [];
+        const uniqueValues = new Set();
+
+        function dropBall(id, value) {
+            if (uniqueValues.has(value)) {
+                console.log(`Value ${value} already exists. Skipping ball ID: ${id}`);
+                return;
+            }
+
+            uniqueValues.add(value);
+
             let x = width / 2;
             let y = 0;
             let vy = 0;
@@ -82,7 +102,15 @@
                 .attr("class", "ball")
                 .attr("cx", x)
                 .attr("cy", y)
-                .attr("r", ballRadius);
+                .attr("r", ballRadius)
+                .attr("data-value", value);
+
+            ballData.push({ id, value, thread: id % 10 });
+            allBallData.push({ id, value, thread: id % 10 });
+            if (ballData.length > 10) ballData.shift();
+
+            ballInfo.innerHTML = ballData.map(ball => `Ball ID: ${ball.id}, Value: ${ball.value}, Thread: ${ball.thread}`).join('<br>');
+            allBallsInfo.innerHTML = allBallData.map(ball => `Ball ID: ${ball.id}, Value: ${ball.value}, Thread: ${ball.thread}`).join('<br>');
 
             function updateBall() {
                 vy += gravity;
@@ -125,9 +153,23 @@
             updateBall();
         }
 
-        for (let i = 0; i < numBalls; i++) {
-            setTimeout(dropBall, i * 200);
+        function toggleAllBalls() {
+            const display = allBallsInfo.style.display;
+            allBallsInfo.style.display = display === "none" ? "block" : "none";
         }
+
+        fetch('/valores')
+            .then(response => response.json())
+            .then(data => {
+                Promise.all(data.map((valor, index) => {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            dropBall(index, valor.value);
+                            resolve();
+                        }, index * 20);
+                    });
+                }));
+            });
     </script>
 </body>
 </html>
