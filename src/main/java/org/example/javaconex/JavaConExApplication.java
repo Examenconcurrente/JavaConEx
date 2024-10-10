@@ -1,6 +1,6 @@
 package org.example.javaconex;
 
-import org.example.javaconex.ImplementacionBase.ValorDataService;
+import org.example.javaconex.ImplementacionHilos.LoadCSVService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,16 +8,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class JavaConExApplication {
 
-    private static ValorDataService valorDataService;
+    private static LoadCSVService loadCSVService;
 
     @Autowired
-    public JavaConExApplication(ValorDataService valorDataService) {
-        JavaConExApplication.valorDataService = valorDataService;
+    public JavaConExApplication(LoadCSVService loadCSVService) {
+        JavaConExApplication.loadCSVService = loadCSVService;
     }
 
     public static void main(String[] args) {
         SpringApplication.run(JavaConExApplication.class, args);
-        valorDataService.loadCSVToDatabase("src/main/resources/valores_normales.csv");
-    }
+        loadCSVService.loadCSVToDatabase("src/main/resources/valores_normales.csv");
 
+    }
 }
