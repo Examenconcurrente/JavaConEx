@@ -1,3 +1,4 @@
+// src/main/java/org/example/javaconex/JavaConExApplication.java
 package org.example.javaconex;
 
 import org.example.javaconex.ImplementacionHilos.LoadCSVService;
@@ -5,50 +6,47 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Scanner;
+import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 
 @SpringBootApplication
 public class JavaConExApplication {
 
-    private static LoadCSVService loadCSVService;
+    private final LoadCSVService loadCSVService;
 
     @Autowired
     public JavaConExApplication(LoadCSVService loadCSVService) {
-        JavaConExApplication.loadCSVService = loadCSVService;
+        this.loadCSVService = loadCSVService;
     }
 
     public static void main(String[] args) {
         SpringApplication.run(JavaConExApplication.class, args);
+    }
+
+    @PostConstruct
+    public void init() {
         loadCSVService.loadCSVToDatabase("src/main/resources/valores_normales.csv");
-        loadCSVService.loadExponentialCSVToDatabase("src/main/resources/valores_exponenciales.csv");
         loadCSVService.loadTStudentCSVToDatabase("src/main/resources/valores_t_student.csv");
+        loadCSVService.loadExponentialCSVToDatabase("src/main/resources/valores_exponenciales.csv");
+        openBrowser("http://localhost:8080/menu.html");
+    }
 
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            System.out.println("Choose an option:");
-            System.out.println("1. Valores Normales");
-            System.out.println("2. Valores Exponenciales");
-            System.out.println("3. Valores T-Student");
-            System.out.println("4. Exit");
-            int choice = scanner.nextInt();
+    private void openBrowser(String url) {
+        String os = System.getProperty("os.name").toLowerCase();
+        Runtime runtime = Runtime.getRuntime();
 
-            switch (choice) {
-                case 1:
-                    loadCSVService.printCSVData();
-                    break;
-                case 2:
-                    loadCSVService.printExponentialData();
-                    break;
-                case 3:
-                    loadCSVService.printTStudentData();
-                    break;
-                case 4:
-                    System.out.println("Exiting...");
-                    scanner.close();
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+        try {
+            if (os.contains("win")) {
+                runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } else if (os.contains("mac")) {
+                runtime.exec("open " + url);
+            } else if (os.contains("nix") || os.contains("nux")) {
+                runtime.exec("xdg-open " + url);
+            } else {
+                System.err.println("Unsupported OS. Please open the following URL manually: " + url);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
