@@ -1,20 +1,22 @@
+// src/main/java/org/example/javaconex/ImplementacionBase/TStudentDataService.java
 package org.example.javaconex.ImplementacionBase;
 
+import org.example.javaconex.Factory.GenericDataService;
+import org.example.javaconex.Factory.GenericDataServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class TStudentDataService {
-    @Autowired
-    private TStudentRepository tStudentRepository;
 
-    public List<TStudentData> getAllTStudentData() {
-        return tStudentRepository.findAll();
+    private final GenericDataService<TStudentData> genericDataService;
+
+    @Autowired
+    public TStudentDataService(TStudentRepository tStudentRepository) {
+        this.genericDataService = GenericDataServiceFactory.createService(tStudentRepository);
     }
 
-    public TStudentData saveTStudentData(TStudentData tStudentData) {
-        return tStudentRepository.save(tStudentData);
+    public GenericDataService<TStudentData> getGenericDataService() {
+        return genericDataService;
     }
 }

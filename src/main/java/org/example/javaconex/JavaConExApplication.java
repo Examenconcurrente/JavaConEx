@@ -1,5 +1,8 @@
+// src/main/java/org/example/javaconex/JavaConExApplication.java
 package org.example.javaconex;
 
+import org.example.javaconex.Factory.Chart;
+import org.example.javaconex.Factory.ChartFactory;
 import org.example.javaconex.ImplementacionHilos.LoadCSVService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -23,6 +26,7 @@ public class JavaConExApplication {
         loadCSVService.loadExponentialCSVToDatabase("src/main/resources/valores_exponenciales.csv");
         loadCSVService.loadTStudentCSVToDatabase("src/main/resources/valores_t_student.csv");
 
+        ChartFactory chartFactory = new ChartFactory(loadCSVService);
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("Choose an option:");
@@ -32,22 +36,17 @@ public class JavaConExApplication {
             System.out.println("4. Exit");
             int choice = scanner.nextInt();
 
-            switch (choice) {
-                case 1:
-                    loadCSVService.printCSVData();
-                    break;
-                case 2:
-                    loadCSVService.printExponentialData();
-                    break;
-                case 3:
-                    loadCSVService.printTStudentData();
-                    break;
-                case 4:
-                    System.out.println("Exiting...");
-                    scanner.close();
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+            if (choice == 4) {
+                System.out.println("Exiting...");
+                scanner.close();
+                System.exit(0);
+            }
+
+            try {
+                Chart chart = chartFactory.getChart(choice);
+                chart.display();
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
