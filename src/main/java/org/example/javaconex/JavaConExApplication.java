@@ -18,6 +18,6 @@ public class JavaConExApplication {
     public static void main(String[] args) {
         SpringApplication.run(JavaConExApplication.class, args);
         loadCSVService.loadCSVToDatabase("src/main/resources/valores_normales.csv");
-
+        loadCSVService.printCSVData();
     }
 }
