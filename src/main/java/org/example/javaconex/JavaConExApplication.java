@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.Scanner;
+
 @SpringBootApplication
 public class JavaConExApplication {
 
@@ -18,6 +20,30 @@ public class JavaConExApplication {
     public static void main(String[] args) {
         SpringApplication.run(JavaConExApplication.class, args);
         loadCSVService.loadCSVToDatabase("src/main/resources/valores_normales.csv");
-        loadCSVService.printCSVData();
+        loadCSVService.loadExponentialCSVToDatabase("src/main/resources/valores_exponenciales.csv");
+
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("Choose an option:");
+            System.out.println("1. Print CSV Data");
+            System.out.println("2. Print Exponential Data");
+            System.out.println("3. Exit");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    loadCSVService.printCSVData();
+                    break;
+                case 2:
+                    loadCSVService.printExponentialData();
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
     }
 }
