@@ -21,6 +21,9 @@ public class LoadCSVService {
     @Autowired
     private ExponentialRepository exponentialRepository;
 
+    @Autowired
+    private TStudentRepository tStudentRepository;
+
     private ExecutorService executor;
     private Semaphore semaphore;
 
@@ -102,6 +105,41 @@ public class LoadCSVService {
         }
     }
 
+    public void loadTStudentCSVToDatabase(String csvFile) {
+        initializeExecutor();
+        tStudentRepository.truncateTable(); // Truncate the table before loading data
+        String line;
+        String cvsSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            while ((line = br.readLine()) != null) {
+                String[] valor = line.split(cvsSplitBy);
+                CountDownLatch latch = new CountDownLatch(1);
+                executor.submit(() -> {
+                    try {
+                        semaphore.acquire();
+                        TStudentData tStudentData = new TStudentData();
+                        tStudentData.setValue(String.valueOf(valor[0]));
+                        tStudentRepository.save(tStudentData);
+                        semaphore.release();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+                latch.await();
+            }
+            System.out.println("Base de datos llenada");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+    }
+
     public void printCSVData() {
         initializeExecutor();
         List<ValorData> valores = valorRepository.findAll();
@@ -142,6 +180,36 @@ public class LoadCSVService {
                 try {
                     semaphore.acquire();
                     System.out.println(Thread.currentThread().getName() + " - ExponentialData: ID=" + valor.getId() + ", Value=" + valor.getValue());
+                    semaphore.release();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+    }
+
+    public void printTStudentData() {
+        initializeExecutor();
+        List<TStudentData> valores = tStudentRepository.findAll();
+        CountDownLatch latch = new CountDownLatch(valores.size());
+
+        for (TStudentData valor : valores) {
+            executor.submit(() -> {
+                try {
+                    semaphore.acquire();
+                    System.out.println(Thread.currentThread().getName() + " - TStudentData: ID=" + valor.getId() + ", Value=" + valor.getValue());
                     semaphore.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
