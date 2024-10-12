@@ -14,7 +14,8 @@
 <body>
     <svg width="1600" height="1600"></svg>
     <div class="info" id="tstudent-hilos-info"></div>
-    <button onclick="fetchTStudentHilos()">Show T-Student Hilos</button>
+    <button onclick="fetchTStudentHilos()">Iniciar T-Student</button>
+    <button onclick="fetchConcurrentData()">Cargar Datos Concurrentes</button>
     <script>
         const width = 1600;
         const height = 1600;
@@ -154,6 +155,22 @@
                         clearInterval(interval);
                     });
             }, 10); // Fetch new data every 10 milliseconds
+        }
+
+        function fetchConcurrentData() {
+            Promise.all([
+                fetch('/tstudent-hilos').then(response => response.json()),
+                fetch('/tstudent-hilos-data').then(response => response.json())
+            ]).then(([hilos, datos]) => {
+                hilos.forEach((info, index) => {
+                    dropBall(info.id, info.value);
+                });
+                datos.forEach((info, index) => {
+                    // Process additional data if needed
+                });
+            }).catch(error => {
+                console.error('Error fetching concurrent data:', error);
+            });
         }
     </script>
 </body>

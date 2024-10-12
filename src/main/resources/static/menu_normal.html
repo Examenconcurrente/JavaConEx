@@ -14,7 +14,8 @@
 <body>
     <svg width="1600" height="1600"></svg>
     <div class="info" id="hilos-concurrentes-info"></div>
-    <button onclick="fetchHilosConcurrentes()">Show Hilos Concurrentes</button>
+    <button onclick="fetchHilosConcurrentes()">Iniciar Normal</button>
+    <button onclick="fetchConcurrentData()">Cargar Datos Concurrentes</button>
     <script>
         const width = 1600;
         const height = 1600;
@@ -153,7 +154,23 @@
                         console.error('Error fetching hilos concurrentes:', error);
                         clearInterval(interval);
                     });
-            }, 10); // Fetch new data every second
+            }, 10); // Fetch new data every 10 milliseconds
+        }
+
+        function fetchConcurrentData() {
+            Promise.all([
+                fetch('/hilos-concurrentes').then(response => response.json()),
+                fetch('/hilos-concurrentes-data').then(response => response.json())
+            ]).then(([hilos, datos]) => {
+                hilos.forEach((info, index) => {
+                    dropBall(info.id, info.value);
+                });
+                datos.forEach((info, index) => {
+                    // Process additional data if needed
+                });
+            }).catch(error => {
+                console.error('Error fetching concurrent data:', error);
+            });
         }
     </script>
 </body>
