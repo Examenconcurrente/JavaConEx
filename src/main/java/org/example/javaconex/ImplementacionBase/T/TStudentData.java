@@ -1,4 +1,4 @@
-package org.example.javaconex.ImplementacionBase;
+package org.example.javaconex.ImplementacionBase.T;
 
 import jakarta.persistence.*;
 import lombok.Data;

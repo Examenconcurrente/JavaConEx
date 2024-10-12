@@ -1,4 +1,4 @@
-package org.example.javaconex.ImplementacionBase;
+package org.example.javaconex.ImplementacionBase.T;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

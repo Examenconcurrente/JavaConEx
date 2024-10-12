@@ -1,6 +1,11 @@
 package org.example.javaconex.ImplementacionHilos;
 
-import org.example.javaconex.ImplementacionBase.*;
+import org.example.javaconex.ImplementacionBase.Exponencial.ExponentialData;
+import org.example.javaconex.ImplementacionBase.Exponencial.ExponentialRepository;
+import org.example.javaconex.ImplementacionBase.Normal.ValorData;
+import org.example.javaconex.ImplementacionBase.Normal.ValorRepository;
+import org.example.javaconex.ImplementacionBase.T.TStudentData;
+import org.example.javaconex.ImplementacionBase.T.TStudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
