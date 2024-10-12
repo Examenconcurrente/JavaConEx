@@ -3,11 +3,16 @@ package org.example.javaconex.ImplementacionHilos;
 import org.example.javaconex.ImplementacionBase.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -138,6 +143,43 @@ public class LoadCSVService {
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
+    }
+
+    public List<Map<String, String>> getCSVData() {
+        initializeExecutor();
+        List<ValorData> valores = valorRepository.findAll();
+        CountDownLatch latch = new CountDownLatch(valores.size());
+        List<Map<String, String>> result = new ArrayList<>();
+
+        for (ValorData valor : valores) {
+            executor.submit(() -> {
+                try {
+                    semaphore.acquire();
+                    Map<String, String> data = new HashMap<>();
+                    data.put("thread", Thread.currentThread().getName());
+                    data.put("id", String.valueOf(valor.getId()));
+                    data.put("value", valor.getValue());
+                    result.add(data);
+                    semaphore.release();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+
+        return result;
     }
 
     public void printCSVData() {

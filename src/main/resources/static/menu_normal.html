@@ -26,6 +26,8 @@
 <div class="info" id="ball-info"></div>
 <button onclick="toggleAllBalls()">Show All Balls</button>
 <div class="info" id="all-balls-info" style="display: none;"></div>
+<div class="info" id="hilos-concurrentes-info"></div>
+<button onclick="fetchHilosConcurrentes()">Show Hilos Concurrentes</button>
 <script>
     const width = 1600;
     const height = 1600;
@@ -156,6 +158,15 @@
     function toggleAllBalls() {
         const display = allBallsInfo.style.display;
         allBallsInfo.style.display = display === "none" ? "block" : "none";
+    }
+
+    function fetchHilosConcurrentes() {
+        fetch('/hilos-concurrentes')
+            .then(response => response.json())
+            .then(data => {
+                const hilosInfo = document.getElementById("hilos-concurrentes-info");
+                hilosInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
+            });
     }
 
     fetch('/valores')
