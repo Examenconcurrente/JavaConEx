@@ -166,7 +166,8 @@
             .then(data => {
                 const hilosInfo = document.getElementById("hilos-concurrentes-info");
                 hilosInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
-            });
+            })
+            .catch(error => console.error('Error fetching hilos concurrentes:', error));
     }
 
     fetch('/valores')

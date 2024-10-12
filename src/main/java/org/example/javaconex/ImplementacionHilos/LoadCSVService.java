@@ -3,8 +3,6 @@ package org.example.javaconex.ImplementacionHilos;
 import org.example.javaconex.ImplementacionBase.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -145,72 +143,42 @@ public class LoadCSVService {
         }
     }
 
-    public List<Map<String, String>> getCSVData() {
-        initializeExecutor();
-        List<ValorData> valores = valorRepository.findAll();
-        CountDownLatch latch = new CountDownLatch(valores.size());
-        List<Map<String, String>> result = new ArrayList<>();
+    public List<Map<String, String>> printCSVData() {
+    initializeExecutor();
+    List<ValorData> valores = valorRepository.findAll();
+    CountDownLatch latch = new CountDownLatch(valores.size());
+    List<Map<String, String>> output = new ArrayList<>();
 
-        for (ValorData valor : valores) {
-            executor.submit(() -> {
-                try {
-                    semaphore.acquire();
-                    Map<String, String> data = new HashMap<>();
-                    data.put("thread", Thread.currentThread().getName());
-                    data.put("id", String.valueOf(valor.getId()));
-                    data.put("value", valor.getValue());
-                    result.add(data);
-                    semaphore.release();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
-
-        return result;
+    for (ValorData valor : valores) {
+        executor.submit(() -> {
+            try {
+                semaphore.acquire();
+                Map<String, String> data = new HashMap<>();
+                data.put("thread", Thread.currentThread().getName());
+                data.put("id", String.valueOf(valor.getId()));
+                data.put("value", valor.getValue());
+                output.add(data);
+                semaphore.release();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                latch.countDown();
+            }
+        });
     }
 
-    public void printCSVData() {
-        initializeExecutor();
-        List<ValorData> valores = valorRepository.findAll();
-        CountDownLatch latch = new CountDownLatch(valores.size());
-
-        for (ValorData valor : valores) {
-            executor.submit(() -> {
-                try {
-                    semaphore.acquire();
-                    System.out.println(Thread.currentThread().getName() + " - ValorData: ID=" + valor.getId() + ", Value=" + valor.getValue());
-                    semaphore.release();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
+    try {
+        latch.await();
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
     }
+
+    executor.shutdown();
+    while (!executor.isTerminated()) {
+    }
+
+    return output;
+}
 
     public void printExponentialData() {
         initializeExecutor();

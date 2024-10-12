@@ -15,6 +15,6 @@ public class DataController {
 
     @GetMapping("/hilos-concurrentes")
     public List<Map<String, String>> getHilosConcurrentes() {
-        return loadCSVService.getCSVData();
+        return loadCSVService.printCSVData();
     }
 }
