@@ -69,10 +69,7 @@
             .attr("width", containerWidth)
             .attr("height", containerHeight);
 
-        const ballInfo = document.getElementById("ball-info");
-        const allBallsInfo = document.getElementById("all-balls-info");
         const ballData = [];
-        const allBallData = [];
         const uniqueValues = new Set();
 
         function dropBall(id, value) {
@@ -95,7 +92,6 @@
                 .attr("data-value", value);
 
             ballData.push({ id, value, thread: id % 10 });
-            allBallData.push({ id, value, thread: id % 10 });
             if (ballData.length > 10) ballData.shift();
 
             function updateBall() {
@@ -139,33 +135,26 @@
             updateBall();
         }
 
-        function toggleAllBalls() {
-            const display = allBallsInfo.style.display;
-            allBallsInfo.style.display = display === "none" ? "block" : "none";
-        }
-
         function fetchTStudentHilos() {
-            fetch('/tstudent-hilos')
-                .then(response => response.json())
-                .then(data => {
-                    const tstudentInfo = document.getElementById("tstudent-hilos-info");
-                    tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
-                })
-                .catch(error => console.error('Error fetching T-Student hilos:', error));
-        }
-
-        fetch('/tstudent')
-            .then(response => response.json())
-            .then(data => {
-                Promise.all(data.map((valor, index) => {
-                    return new Promise(resolve => {
-                        setTimeout(() => {
-                            dropBall(index, valor.value);
-                            resolve();
-                        }, index * 20);
+            let index = 0;
+            const interval = setInterval(() => {
+                fetch('/tstudent-hilos')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (index < data.length) {
+                            const info = data[index];
+                            dropBall(info.id, info.value);
+                            index++;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching T-Student hilos:', error);
+                        clearInterval(interval);
                     });
-                }));
-            });
+            }, 10); // Fetch new data every 10 milliseconds
+        }
     </script>
 </body>
 </html>
