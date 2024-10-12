@@ -63,7 +63,7 @@ public class LoadCSVService {
                 });
                 latch.await();
             }
-            System.out.println("Base de datos llenada");
+            System.out.println("Base de datos de la normal llenada");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -98,7 +98,7 @@ public class LoadCSVService {
                 });
                 latch.await();
             }
-            System.out.println("Base de datos llenada");
+            System.out.println("Base de datos de la exponencial llenada");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -133,7 +133,7 @@ public class LoadCSVService {
                 });
                 latch.await();
             }
-            System.out.println("Base de datos llenada");
+            System.out.println("Base de datos de la t llenada");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
