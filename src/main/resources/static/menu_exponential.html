@@ -130,6 +130,7 @@
                         .duration(500)
                         .attr("cx", container.x)
                         .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
+                    updateInfo(); // Update info each time a ball falls into a container
                 }
             }
 
@@ -158,32 +159,25 @@
         }
 
         function fetchConcurrentData() {
-            let index = 0;
-            const interval = setInterval(() => {
-                fetch('/exponential-data')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (index < data.length) {
-                            const info = data[index];
-                            dropBall(info.id, info.value);
-                            updateInfo(info);
-                            index++;
-                        } else {
-                            clearInterval(interval);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching concurrent data:', error);
-                        clearInterval(interval);
-                    });
-            }, 10); // Fetch new data every 10 milliseconds
+            updateInfo(); // Initial call to fetch data
+            setInterval(updateInfo, 1000); // Update info every second
         }
 
-        function updateInfo(info) {
-            const infoDiv = document.getElementById('exponential-data-info');
-            const threadInfo = document.createElement('div');
-            threadInfo.textContent = `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`;
-            infoDiv.appendChild(threadInfo);
+        function updateInfo() {
+            fetch('/exponential-data')
+                .then(response => response.json())
+                .then(data => {
+                    const infoDiv = document.getElementById('exponential-data-info');
+                    infoDiv.innerHTML = '';
+                    data.forEach(info => {
+                        const p = document.createElement('p');
+                        p.textContent = `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`;
+                        infoDiv.appendChild(p);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error updating info:', error);
+                });
         }
     </script>
 </body>
