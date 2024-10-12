@@ -17,4 +17,14 @@ public class DataController {
     public List<Map<String, String>> getHilosConcurrentes() {
         return loadCSVService.printCSVData();
     }
+
+    @GetMapping("/exponential-data")
+    public List<Map<String, String>> getExponentialData() {
+        return loadCSVService.printExponentialData();
+    }
+
+    @GetMapping("/tstudent-hilos")
+    public List<Map<String, String>> getTStudentData() {
+        return loadCSVService.printTStudentData();
+    }
 }

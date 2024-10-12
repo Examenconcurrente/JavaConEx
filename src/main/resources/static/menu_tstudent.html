@@ -5,20 +5,10 @@
     <title>Galton Board - T-Student</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        .pin {
-            fill: steelblue;
-        }
-        .ball {
-            fill: red;
-        }
-        .container {
-            fill: lightgray;
-        }
-        .info {
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            margin-top: 20px;
-        }
+        .pin { fill: steelblue; }
+        .ball { fill: red; }
+        .container { fill: lightgray; }
+        .info { font-family: Arial, sans-serif; font-size: 14px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -26,9 +16,9 @@
     <div class="info" id="ball-info"></div>
     <button onclick="toggleAllBalls()">Show All Balls</button>
     <div class="info" id="all-balls-info" style="display: none;"></div>
+    <div class="info" id="tstudent-hilos-info"></div>
+    <button onclick="fetchTStudentHilos()">Show T-Student Hilos</button>
     <script>
-        // Similar JavaScript code as in menu_normal.html but fetching data from /tstudent endpoint
-        // and using T-Student specific logic
         const width = 1600;
         const height = 1600;
         const numRows = 30;
@@ -158,6 +148,16 @@
         function toggleAllBalls() {
             const display = allBallsInfo.style.display;
             allBallsInfo.style.display = display === "none" ? "block" : "none";
+        }
+
+        function fetchTStudentHilos() {
+            fetch('/tstudent-hilos')
+                .then(response => response.json())
+                .then(data => {
+                    const tstudentInfo = document.getElementById("tstudent-hilos-info");
+                    tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
+                })
+                .catch(error => console.error('Error fetching T-Student hilos:', error));
         }
 
         fetch('/tstudent')
