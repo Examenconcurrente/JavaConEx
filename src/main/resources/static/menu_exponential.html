@@ -46,7 +46,7 @@
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col <= row; col++) {
                 pins.push({
-                    x: width / 2 + (col - row / 2) * 20 - row * 5, // Skewing pins to the left
+                    x: width / 2 + (col - row / 2) * 20,
                     y: row * 20 + 50
                 });
             }
@@ -126,8 +126,8 @@
                         vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
                         vy = Math.sin(angle) * bounce;
 
-                        // 50% chance to go left or right
-                        vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
+                        // 70% chance to go right, 30% chance to go left
+                        vx += (Math.random() < 0.7 ? 1 : -1) * 0.5;
                         break;
                     }
                 }
