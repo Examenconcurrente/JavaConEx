@@ -121,8 +121,7 @@
                     vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
                     vy = Math.sin(angle) * bounce;
 
-                    // 50% chance to go left or right
-                    vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
+                    vx += (Math.random() < 0.72 ? 1 : -1) * 0.5;
                     break;
                 }
             }
