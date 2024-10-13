@@ -84,7 +84,6 @@
     const uniqueValues = new Set();
 
     function dropBall(id, value) {
-        console.log(`Dropping ball ID: ${id}, Value: ${value}`); // Debugging log
         if (uniqueValues.has(value)) {
             console.log(`Value ${value} already exists. Skipping ball ID: ${id}`);
             return;
@@ -180,7 +179,7 @@
                 const scrollContainer = document.getElementById("scroll-container");
                 scrollContainer.scrollTop = scrollContainer.scrollHeight;
             }
-            setTimeout(processQueue, 20); // Adjust the delay as needed
+            setTimeout(processQueue, 1);
         }
 
         processQueue();
