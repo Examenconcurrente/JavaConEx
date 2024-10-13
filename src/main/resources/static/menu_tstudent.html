@@ -10,7 +10,7 @@
         .container { fill: lightgray; }
         .info { font-family: Arial, sans-serif; font-size: 14px; margin-top: 20px; }
         .scroll-container {
-            width: 500px; /* Increased width */
+            width: 450px; /* Increased width */
             height: 200px; /* Decreased height */
             overflow-y: scroll;
             border: 1px solid #ccc;
@@ -21,10 +21,10 @@
 </head>
 <body>
     <svg width="1600" height="1600"></svg>
-    <div class="scroll-container">
+    <div class="scroll-container" id="scroll-container">
         <div class="info" id="tstudent-data-info"></div>
     </div>
-    <button onclick="streamTStudentData()">Ver Hilos</button>
+    <button id="startButton" onclick="startSimulation()">Inicio</button>
     <script>
         const width = 1600;
         const height = 1600;
@@ -153,6 +153,8 @@
                 .then(data => {
                     const tstudentInfo = document.getElementById("tstudent-data-info");
                     tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
+                    const scrollContainer = document.getElementById("scroll-container");
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
                 })
                 .catch(error => console.error('Error fetching T-Student hilos:', error));
         }
@@ -174,6 +176,8 @@
                     const data = messageQueue.shift();
                     const tstudentInfo = document.getElementById("tstudent-data-info");
                     tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+                    const scrollContainer = document.getElementById("scroll-container");
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
                 }
                 setTimeout(processQueue, 20); // Adjust the delay as needed
             }
@@ -181,18 +185,21 @@
             processQueue();
         }
 
-        fetch('/tstudent')
-            .then(response => response.json())
-            .then(data => {
-                Promise.all(data.map((valor, index) => {
-                    return new Promise(resolve => {
-                        setTimeout(() => {
-                            dropBall(index, valor.value);
-                            resolve();
-                        }, index * 20);
-                    });
-                }));
-            });
+        function startSimulation() {
+            streamTStudentData();
+            fetch('/tstudent')
+                .then(response => response.json())
+                .then(data => {
+                    Promise.all(data.map((valor, index) => {
+                        return new Promise(resolve => {
+                            setTimeout(() => {
+                                dropBall(index, valor.value);
+                                resolve();
+                            }, index * 20);
+                        });
+                    }));
+                });
+        }
     </script>
 </body>
 </html>
