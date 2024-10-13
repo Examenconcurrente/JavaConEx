@@ -190,7 +190,7 @@
     function startSimulation() {
         document.getElementById("startButton").disabled = true;
         streamExponentialData();
-        fetch('/exponential-data')
+        fetch('/exponential')
             .then(response => response.json())
             .then(data => {
                 console.log('Starting simulation with data:', data); // Debugging log
