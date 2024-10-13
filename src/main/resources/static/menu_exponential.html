@@ -27,11 +27,11 @@
 <button id="startButton" onclick="startSimulation()">Inicio</button>
 <script>
     const width = 1600;
-    const height = 1600;
+    const height = 3000;
     const numRows = 30;
     const pinRadius = 5;
     const ballRadius = 3;
-    const containerHeight = 300;
+    const containerHeight = 1900;
     const containerWidth = 10;
     const gravity = 0.98;
     const bounce = 0.6;
@@ -120,7 +120,7 @@
                     vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
                     vy = Math.sin(angle) * bounce;
 
-                    vx += (Math.random() < 0.72 ? 1 : -1) * 0.5;
+                    vx += (Math.random() < 0.735 ? 1 : -1) * 0.5;
                     break;
                 }
             }
@@ -179,7 +179,7 @@
                 const scrollContainer = document.getElementById("scroll-container");
                 scrollContainer.scrollTop = scrollContainer.scrollHeight;
             }
-            setTimeout(processQueue, 1);
+            setTimeout(processQueue, 15);
         }
 
         processQueue();
