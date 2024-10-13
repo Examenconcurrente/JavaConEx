@@ -177,7 +177,7 @@ Se resolvió asegurándose de que la base de datos se lean primero, luego se tru
 ## Screenshots
 
 ### Tablas Base de Datos
-![Tablas Base de Datos](JavaConEx/screenshots/1.png)
+![Tablas Base de Datos](screenshots/1.png)
 
 ### Tabla Normal
 ![Tabla Normal](path/to/tabla_normal.png)
