@@ -13,9 +13,6 @@
 </head>
 <body>
     <svg width="1600" height="1600"></svg>
-    <div class="info" id="ball-info"></div>
-    <button onclick="toggleAllBalls()">Show All Balls</button>
-    <div class="info" id="all-balls-info" style="display: none;"></div>
     <div class="info" id="tstudent-hilos-info"></div>
     <button onclick="fetchTStudentHilos()">Show T-Student Hilos</button>
     <script>
@@ -72,8 +69,6 @@
             .attr("width", containerWidth)
             .attr("height", containerHeight);
 
-        const ballInfo = document.getElementById("ball-info");
-        const allBallsInfo = document.getElementById("all-balls-info");
         const ballData = [];
         const allBallData = [];
         const uniqueValues = new Set();
@@ -100,9 +95,6 @@
             ballData.push({ id, value, thread: id % 10 });
             allBallData.push({ id, value, thread: id % 10 });
             if (ballData.length > 10) ballData.shift();
-
-            ballInfo.innerHTML = ballData.map(ball => `Ball ID: ${ball.id}, Value: ${ball.value}, Thread: ${ball.thread}`).join('<br>');
-            allBallsInfo.innerHTML = allBallData.map(ball => `Ball ID: ${ball.id}, Value: ${ball.value}, Thread: ${ball.thread}`).join('<br>');
 
             function updateBall() {
                 vy += gravity;
@@ -143,11 +135,6 @@
             }
 
             updateBall();
-        }
-
-        function toggleAllBalls() {
-            const display = allBallsInfo.style.display;
-            allBallsInfo.style.display = display === "none" ? "block" : "none";
         }
 
         function fetchTStudentHilos() {
