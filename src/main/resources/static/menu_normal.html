@@ -10,33 +10,33 @@
         .container { fill: lightgray; }
         .info { font-family: Arial, sans-serif; font-size: 14px; margin-top: 20px; }
         .scroll-container {
-            width: 400px; /* Decreased width */
-            height: 200px; /* Decreased height */
+            width: 400px;
+            height: 200px;
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
             margin-top: 20px;
-            margin-left: 200px; /* Added margin-left to move right */
+            margin-left: 200px;
         }
         #startButton {
-            margin-left: 200px; /* Added margin-left to move right */
+            margin-left: 200px;
         }
     </style>
 </head>
 <body>
-<svg width="800" height="800"></svg> <!-- Reduced dimensions -->
+<svg width="800" height="800"></svg>
 <div class="scroll-container" id="scroll-container">
     <div class="info" id="normal-data-info"></div>
 </div>
 <button id="startButton" onclick="startSimulation()">Inicio</button>
 <script>
-    const width = 800; // Reduced width
-    const height = 1500; // Reduced height
+    const width = 800;
+    const height = 1500;
     const numRows = 30;
-    const pinRadius = 2.5; // Reduced pin radius
-    const ballRadius = 1.5; // Reduced ball radius
-    const containerHeight = 950; // Reduced container height
-    const containerWidth = 5; // Reduced container width
+    const pinRadius = 2.5;
+    const ballRadius = 1.5;
+    const containerHeight = 950;
+    const containerWidth = 5;
     const gravity = 0.98;
     const bounce = 0.6;
     const friction = 0.01;
@@ -49,8 +49,8 @@
     for (let row = 0; row < numRows; row++) {
         for (let col = 0; col <= row; col++) {
             pins.push({
-                x: width / 2 + (col - row / 2) * 10, // Adjusted pin positions
-                y: row * 10 + 25 // Adjusted pin positions
+                x: width / 2 + (col - row / 2) * 10,
+                y: row * 10 + 25
             });
         }
     }
@@ -67,7 +67,7 @@
     const containers = [];
     for (let i = 0; i <= numRows; i++) {
         containers.push({
-            x: width / 2 + (i - numRows / 2) * 10, // Adjusted container positions
+            x: width / 2 + (i - numRows / 2) * 10,
             y: height - containerHeight / 2,
             count: 0
         });
@@ -98,7 +98,7 @@
         let x = width / 2;
         let y = 0;
         let vy = 0;
-        let vx = (Math.random() - 0.5) * 1; // Adjusted initial horizontal velocity
+        let vx = (Math.random() - 0.5) * 1;
         const ball = svg.append("circle")
             .attr("class", "ball")
             .attr("cx", x)
@@ -121,16 +121,13 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance < pinRadius + ballRadius) {
                     const angle = Math.atan2(dy, dx);
-                    vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
+                    vx = Math.cos(angle) * bounce;
                     vy = Math.sin(angle) * bounce;
-
-                    // 50% chance to go left or right
                     vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
                     break;
                 }
             }
 
-            // Apply friction
             vx *= (1 - friction);
 
             ball.attr("cx", x).attr("cy", y);

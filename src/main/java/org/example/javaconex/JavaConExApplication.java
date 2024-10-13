@@ -1,4 +1,3 @@
-// src/main/java/org/example/javaconex/JavaConExApplication.java
 package org.example.javaconex;
 
 import org.example.javaconex.ImplementacionHilos.LoadCSVService;
