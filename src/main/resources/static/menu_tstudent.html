@@ -20,186 +20,187 @@
     </style>
 </head>
 <body>
-    <svg width="1600" height="1600"></svg>
-    <div class="scroll-container" id="scroll-container">
-        <div class="info" id="tstudent-data-info"></div>
-    </div>
-    <button id="startButton" onclick="startSimulation()">Inicio</button>
-    <script>
-        const width = 1600;
-        const height = 1600;
-        const numRows = 30;
-        const pinRadius = 5;
-        const ballRadius = 3;
-        const containerHeight = 300;
-        const containerWidth = 10;
-        const gravity = 0.98;
-        const bounce = 0.6;
-        const friction = 0.01;
+<svg width="1600" height="1600"></svg>
+<div class="scroll-container" id="scroll-container">
+    <div class="info" id="tstudent-data-info"></div>
+</div>
+<button id="startButton" onclick="startSimulation()">Inicio</button>
+<script>
+    const width = 1600;
+    const height = 1600;
+    const numRows = 30;
+    const pinRadius = 5;
+    const ballRadius = 3;
+    const containerHeight = 300;
+    const containerWidth = 10;
+    const gravity = 0.98;
+    const bounce = 0.6;
+    const friction = 0.01;
 
-        const svg = d3.select("svg")
-            .attr("width", width)
-            .attr("height", height);
+    const svg = d3.select("svg")
+        .attr("width", width)
+        .attr("height", height);
 
-        const pins = [];
-        for (let row = 0; row < numRows; row++) {
-            for (let col = 0; col <= row; col++) {
-                pins.push({
-                    x: width / 2 + (col - row / 2) * 20,
-                    y: row * 20 + 50
-                });
-            }
-        }
-
-        svg.selectAll(".pin")
-            .data(pins)
-            .enter()
-            .append("circle")
-            .attr("class", "pin")
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .attr("r", pinRadius);
-
-        const containers = [];
-        for (let i = 0; i <= numRows; i++) {
-            containers.push({
-                x: width / 2 + (i - numRows / 2) * 20,
-                y: height - containerHeight / 2,
-                count: 0
+    const pins = [];
+    for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col <= row; col++) {
+            pins.push({
+                x: width / 2 + (col - row / 2) * 20,
+                y: row * 20 + 50
             });
         }
+    }
 
-        svg.selectAll(".container")
-            .data(containers)
-            .enter()
-            .append("rect")
-            .attr("class", "container")
-            .attr("x", d => d.x - containerWidth / 2)
-            .attr("y", d => d.y - containerHeight / 2)
-            .attr("width", containerWidth)
-            .attr("height", containerHeight);
+    svg.selectAll(".pin")
+        .data(pins)
+        .enter()
+        .append("circle")
+        .attr("class", "pin")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", pinRadius);
 
-        const ballData = [];
-        const allBallData = [];
-        const uniqueValues = new Set();
+    const containers = [];
+    for (let i = 0; i <= numRows; i++) {
+        containers.push({
+            x: width / 2 + (i - numRows / 2) * 20,
+            y: height - containerHeight / 2,
+            count: 0
+        });
+    }
 
-        function dropBall(id, value) {
-            if (uniqueValues.has(value)) {
-                console.log(`Value ${value} already exists. Skipping ball ID: ${id}`);
-                return;
+    svg.selectAll(".container")
+        .data(containers)
+        .enter()
+        .append("rect")
+        .attr("class", "container")
+        .attr("x", d => d.x - containerWidth / 2)
+        .attr("y", d => d.y - containerHeight / 2)
+        .attr("width", containerWidth)
+        .attr("height", containerHeight);
+
+    const ballData = [];
+    const allBallData = [];
+    const uniqueValues = new Set();
+
+    function dropBall(id, value) {
+        if (uniqueValues.has(value)) {
+            console.log(`Value ${value} already exists. Skipping ball ID: ${id}`);
+            return;
+        }
+
+        uniqueValues.add(value);
+
+        let x = width / 2;
+        let y = 0;
+        let vy = 0;
+        let vx = (Math.random() - 0.5) * 2; // Random initial horizontal velocity
+        const ball = svg.append("circle")
+            .attr("class", "ball")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", ballRadius)
+            .attr("data-value", value);
+
+        ballData.push({ id, value, thread: id % 10 });
+        allBallData.push({ id, value, thread: id % 10 });
+        if (ballData.length > 10) ballData.shift();
+
+        function updateBall() {
+            vy += gravity;
+            y += vy;
+            x += vx;
+
+            for (let pin of pins) {
+                const dx = x - pin.x;
+                const dy = y - pin.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < pinRadius + ballRadius) {
+                    const angle = Math.atan2(dy, dx);
+                    vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
+                    vy = Math.sin(angle) * bounce;
+
+                    // 50% chance to go left or right
+                    vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
+                    break;
+                }
             }
 
-            uniqueValues.add(value);
+            // Apply friction
+            vx *= (1 - friction);
 
-            let x = width / 2;
-            let y = 0;
-            let vy = 0;
-            let vx = (Math.random() - 0.5) * 2; // Random initial horizontal velocity
-            const ball = svg.append("circle")
-                .attr("class", "ball")
-                .attr("cx", x)
-                .attr("cy", y)
-                .attr("r", ballRadius)
-                .attr("data-value", value);
+            ball.attr("cx", x).attr("cy", y);
 
-            ballData.push({ id, value, thread: id % 10 });
-            allBallData.push({ id, value, thread: id % 10 });
-            if (ballData.length > 10) ballData.shift();
-
-            function updateBall() {
-                vy += gravity;
-                y += vy;
-                x += vx;
-
-                for (let pin of pins) {
-                    const dx = x - pin.x;
-                    const dy = y - pin.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < pinRadius + ballRadius) {
-                        const angle = Math.atan2(dy, dx);
-                        vx = Math.cos(angle) * bounce; // Adjust horizontal velocity
-                        vy = Math.sin(angle) * bounce;
-
-                        // 50% chance to go left or right
-                        vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
-                        break;
-                    }
-                }
-
-                // Apply friction
-                vx *= (1 - friction);
-
-                ball.attr("cx", x).attr("cy", y);
-
-                if (y < height - containerHeight) {
-                    requestAnimationFrame(updateBall);
-                } else {
-                    const containerIndex = Math.floor((x - width / 2) / 20 + numRows / 2);
-                    const container = containers[Math.max(0, Math.min(containerIndex, containers.length - 1))];
-                    container.count += 1;
-                    ball.transition()
-                        .duration(500)
-                        .attr("cx", container.x)
-                        .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
-                }
+            if (y < height - containerHeight) {
+                requestAnimationFrame(updateBall);
+            } else {
+                const containerIndex = Math.floor((x - width / 2) / 20 + numRows / 2);
+                const container = containers[Math.max(0, Math.min(containerIndex, containers.length - 1))];
+                container.count += 1;
+                ball.transition()
+                    .duration(500)
+                    .attr("cx", container.x)
+                    .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
             }
-
-            updateBall();
         }
 
-        function fetchTStudentHilos() {
-            fetch('/tstudent-hilos')
-                .then(response => response.json())
-                .then(data => {
-                    const tstudentInfo = document.getElementById("tstudent-data-info");
-                    tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
-                    const scrollContainer = document.getElementById("scroll-container");
-                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
-                })
-                .catch(error => console.error('Error fetching T-Student hilos:', error));
-        }
+        updateBall();
+    }
 
-        function streamTStudentData() {
-            const eventSource = new EventSource('/tstudent/stream');
-            let messageQueue = [];
-            eventSource.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                messageQueue.push(data);
-            };
-            eventSource.onerror = function() {
-                console.error('Error streaming T-Student data');
-                eventSource.close();
-            };
+    function fetchTStudentHilos() {
+        fetch('/tstudent-hilos')
+            .then(response => response.json())
+            .then(data => {
+                const tstudentInfo = document.getElementById("tstudent-data-info");
+                tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
+                const scrollContainer = document.getElementById("scroll-container");
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            })
+            .catch(error => console.error('Error fetching T-Student hilos:', error));
+    }
 
-            function processQueue() {
-                if (messageQueue.length > 0) {
-                    const data = messageQueue.shift();
-                    const tstudentInfo = document.getElementById("tstudent-data-info");
-                    tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
-                    const scrollContainer = document.getElementById("scroll-container");
-                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
-                }
-                setTimeout(processQueue, 20); // Adjust the delay as needed
+    function streamTStudentData() {
+        const eventSource = new EventSource('/tstudent/stream');
+        let messageQueue = [];
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            messageQueue.push(data);
+        };
+        eventSource.onerror = function() {
+            console.error('Error streaming T-Student data');
+            eventSource.close();
+        };
+
+        function processQueue() {
+            if (messageQueue.length > 0) {
+                const data = messageQueue.shift();
+                const tstudentInfo = document.getElementById("tstudent-data-info");
+                tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+                const scrollContainer = document.getElementById("scroll-container");
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
             }
-
-            processQueue();
+            setTimeout(processQueue, 20); // Adjust the delay as needed
         }
 
-        function startSimulation() {
-            streamTStudentData();
-            fetch('/tstudent')
-                .then(response => response.json())
-                .then(data => {
-                    Promise.all(data.map((valor, index) => {
-                        return new Promise(resolve => {
-                            setTimeout(() => {
-                                dropBall(index, valor.value);
-                                resolve();
-                            }, index * 20);
-                        });
-                    }));
-                });
-        }
-    </script>
+        processQueue();
+    }
+
+    function startSimulation() {
+        document.getElementById("startButton").disabled = true;
+        streamTStudentData();
+        fetch('/tstudent')
+            .then(response => response.json())
+            .then(data => {
+                Promise.all(data.map((valor, index) => {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            dropBall(index, valor.value);
+                            resolve();
+                        }, index * 20);
+                    });
+                }));
+            });
+    }
+</script>
 </body>
 </html>
