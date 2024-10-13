@@ -180,11 +180,11 @@ Se resolvió asegurándose de que la base de datos se lean primero, luego se tru
 ![Tablas Base de Datos](screenshots/1.png)
 
 ### Tabla Normal
-![Tabla Normal](path/to/tabla_normal.png)
+![Tabla Normal](screenshots/2.png)
 
 ### Módulo Acción
-![Módulo Acción](path/to/modulo_accion.png)
+![Módulo Acción](screenshots/3.png)
 
 ### Módulo Resultados
-![Módulo Resultados](path/to/modulo_resultados.png)
+![Módulo Resultados](screenshots/4.png)
 
