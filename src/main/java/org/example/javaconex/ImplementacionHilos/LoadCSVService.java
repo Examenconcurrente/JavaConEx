@@ -149,11 +149,10 @@ public class LoadCSVService {
         }
     }
 
-    public List<Map<String, String>> printCSVData() {
+    public void streamCSVData(SseEmitter emitter) {
         initializeExecutor();
         List<ValorData> valores = valorRepository.findAll();
         CountDownLatch latch = new CountDownLatch(valores.size());
-        List<Map<String, String>> output1 = new ArrayList<>();
 
         for (ValorData valor : valores) {
             executor.submit(() -> {
@@ -163,7 +162,13 @@ public class LoadCSVService {
                     data.put("thread", Thread.currentThread().getName());
                     data.put("id", String.valueOf(valor.getId()));
                     data.put("value", valor.getValue());
-                    output1.add(data);
+                    try {
+                        emitter.send(SseEmitter.event().data(data));
+                        Thread.sleep(0);
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                        Thread.currentThread().interrupt();
+                    }
                     semaphore.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -173,24 +178,21 @@ public class LoadCSVService {
             });
         }
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
-
-        return output1;
+        new Thread(() -> {
+            try {
+                latch.await();
+                emitter.complete();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
 
-    public List<Map<String, String>> printExponentialData() {
+    public void streamExponentialData(SseEmitter emitter) {
         initializeExecutor();
         List<ExponentialData> valores = exponentialRepository.findAll();
         CountDownLatch latch = new CountDownLatch(valores.size());
-        List<Map<String, String>> output2 = new ArrayList<>();
 
         for (ExponentialData valor : valores) {
             executor.submit(() -> {
@@ -200,7 +202,13 @@ public class LoadCSVService {
                     data.put("thread", Thread.currentThread().getName());
                     data.put("id", String.valueOf(valor.getId()));
                     data.put("value", valor.getValue());
-                    output2.add(data);
+                    try {
+                        emitter.send(SseEmitter.event().data(data));
+                        Thread.sleep(0);
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                        Thread.currentThread().interrupt();
+                    }
                     semaphore.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -210,59 +218,54 @@ public class LoadCSVService {
             });
         }
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        executor.shutdown();
+        new Thread(() -> {
+            try {
+                latch.await();
+                emitter.complete();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+    }
+
+    public void streamTStudentData(SseEmitter emitter) {
+        initializeExecutor();
+        List<TStudentData> valores = tStudentRepository.findAll();
+        CountDownLatch latch = new CountDownLatch(valores.size());
+
+        for (TStudentData valor : valores) {
+            executor.submit(() -> {
+                try {
+                    semaphore.acquire();
+                    Map<String, String> data = new HashMap<>();
+                    data.put("thread", Thread.currentThread().getName());
+                    data.put("id", String.valueOf(valor.getId()));
+                    data.put("value", valor.getValue());
+                    try {
+                        emitter.send(SseEmitter.event().data(data));
+                        Thread.sleep(0);
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                        Thread.currentThread().interrupt();
+                    }
+                    semaphore.release();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    latch.countDown();
+                }
+            });
         }
 
         executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
-
-        return output2;
-    }
-
-  public void streamTStudentData(SseEmitter emitter) {
-    initializeExecutor();
-    List<TStudentData> valores = tStudentRepository.findAll();
-    CountDownLatch latch = new CountDownLatch(valores.size());
-
-    for (TStudentData valor : valores) {
-        executor.submit(() -> {
+        new Thread(() -> {
             try {
-                semaphore.acquire();
-                Map<String, String> data = new HashMap<>();
-                data.put("thread", Thread.currentThread().getName());
-                data.put("id", String.valueOf(valor.getId()));
-                data.put("value", valor.getValue());
-                // Enviar datos al cliente en tiempo real
-                try {
-                    emitter.send(SseEmitter.event().data(data));
-                    // Agregar un sleep para ralentizar el envío de datos
-                    Thread.sleep(0); // milisegundos de pausa entre envíos
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
-                semaphore.release();
+                latch.await();
+                emitter.complete();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-            } finally {
-                latch.countDown();
             }
-        });
+        }).start();
     }
-
-    // Cuando todo termine, cerrar el emisor
-    executor.shutdown();
-    new Thread(() -> {
-        try {
-            latch.await();
-            emitter.complete();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }).start();
-}
 }

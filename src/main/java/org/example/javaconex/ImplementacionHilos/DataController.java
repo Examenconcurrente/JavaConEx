@@ -20,29 +20,41 @@ public class DataController {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @GetMapping("/hilos-concurrentes")
-    public List<Map<String, String>> getHilosConcurrentes() {
-        return loadCSVService.printCSVData();
+    public SseEmitter getHilosConcurrentes() {
+        SseEmitter emitter = new SseEmitter();
+        executorService.submit(() -> {
+            try {
+                loadCSVService.streamCSVData(emitter);
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        });
+        return emitter;
     }
 
-    @GetMapping("/exponential-data")
-    public List<Map<String, String>> getExponentialData() {
-        return loadCSVService.printExponentialData();
+    @GetMapping("/exponential/stream")
+    public SseEmitter streamExponentialData() {
+        SseEmitter emitter = new SseEmitter();
+        executorService.submit(() -> {
+            try {
+                loadCSVService.streamExponentialData(emitter);
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        });
+        return emitter;
     }
 
     @GetMapping("/tstudent/stream")
     public SseEmitter streamTStudentData() {
         SseEmitter emitter = new SseEmitter();
-
-        // Inicia un nuevo hilo para enviar los datos en tiempo real
         executorService.submit(() -> {
             try {
-                // Enviar datos en tiempo real usando el método streamTStudentData
                 loadCSVService.streamTStudentData(emitter);
             } catch (Exception e) {
                 emitter.completeWithError(e);
             }
         });
-
         return emitter;
     }
 }
