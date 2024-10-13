@@ -17,11 +17,14 @@ public class DataController {
     @Autowired
     private LoadCSVService loadCSVService;
 
+    // Servicio de ejecutor de un solo hilo para manejar tareas asíncronas
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+    // Endpoint para transmitir datos de hilos concurrentes
     @GetMapping("/hilos-concurrentes")
     public SseEmitter getHilosConcurrentes() {
         SseEmitter emitter = new SseEmitter();
+        // Envía una tarea al servicio de ejecutor para transmitir datos CSV
         executorService.submit(() -> {
             try {
                 loadCSVService.streamCSVData(emitter);
@@ -32,9 +35,11 @@ public class DataController {
         return emitter;
     }
 
+    // Endpoint para transmitir datos exponenciales
     @GetMapping("/exponential/stream")
     public SseEmitter streamExponentialData() {
         SseEmitter emitter = new SseEmitter();
+        // Envía una tarea al servicio de ejecutor para transmitir datos exponenciales
         executorService.submit(() -> {
             try {
                 loadCSVService.streamExponentialData(emitter);
@@ -45,9 +50,11 @@ public class DataController {
         return emitter;
     }
 
+    // Endpoint para transmitir datos de T-Student
     @GetMapping("/tstudent/stream")
     public SseEmitter streamTStudentData() {
         SseEmitter emitter = new SseEmitter();
+        // Envía una tarea al servicio de ejecutor para transmitir datos de T-Student
         executorService.submit(() -> {
             try {
                 loadCSVService.streamTStudentData(emitter);

@@ -86,6 +86,52 @@ Es una interfaz que extiende `JpaRepository`, proporcionando métodos para acced
 
 - **`truncateTable()`**: Trunca la tabla `valor_data`, eliminando todos los registros.
 
+## Interfaz Web
+
+La interfaz web permite a los usuarios interactuar con los datos cargados en la base de datos. Está compuesta por cuatro archivos HTML principales:
+
+#### `menu.html`
+
+**Descripción:**
+Este archivo actúa como el menú principal de la aplicación, proporcionando enlaces a las diferentes distribuciones estadísticas (Normal, Exponencial y T-Student) mediante iframes.
+
+**Funcionamiento:**
+- Contiene tres secciones, cada una con un iframe que carga una página HTML específica para cada distribución.
+- Permite a los usuarios navegar entre las diferentes visualizaciones de datos sin salir de la página principal.
+
+#### `menu_normal.html`
+
+**Descripción:**
+Este archivo muestra la visualización de la distribución normal utilizando un tablero de Galton.
+
+**Funcionamiento:**
+- Utiliza D3.js para representar visualmente las bolas y los pines en el tablero.
+- Las bolas caen y se distribuyen según la distribución normal.
+- Los datos se transmiten en tiempo real desde el servidor utilizando Server-Sent Events (SSE).
+- Un botón de inicio permite comenzar la simulación de la caída de las bolas.
+
+#### `menu_exponential.html`
+
+**Descripción:**
+Este archivo muestra la visualización de la distribución exponencial utilizando un tablero de Galton.
+
+**Funcionamiento:**
+- Similar a `menu_normal.html`, utiliza D3.js para la representación visual.
+- Las bolas caen y se distribuyen según la distribución exponencial.
+- Los datos se transmiten en tiempo real desde el servidor utilizando SSE.
+- Un botón de inicio permite comenzar la simulación de la caída de las bolas.
+
+#### `menu_tstudent.html`
+
+**Descripción:**
+Este archivo muestra la visualización de la distribución T-Student utilizando un tablero de Galton.
+
+**Funcionamiento:**
+- Utiliza D3.js para representar visualmente las bolas y los pines en el tablero.
+- Las bolas caen y se distribuyen según la distribución T-Student.
+- Los datos se transmiten en tiempo real desde el servidor utilizando SSE.
+- Un botón de inicio permite comenzar la simulación de la caída de las bolas.
+
 ## Problemas y Soluciones
 
 ### Problema 1: Sincronización de la representación de las bolas
@@ -103,3 +149,42 @@ En un inicio, la transmisión de datos de la base de datos al front se realizaba
 
 **Solución:**
 Investigando, encontramos `SseEmitter` para poder transmitir los datos en tiempo real sin necesidad de guardarlos en una variable.
+
+### Problema 3: Creación del menú exponencial por la disposición de las bolas
+
+**Descripción:**
+La disposición de las bolas en el menú exponencial no era la esperada debido a la probabilidad inicial de 0.5, lo que resultaba en una distribución no adecuada para la visualización.
+
+**Solución:**
+Se cambió la probabilidad de 0.5 a 0.73 para ajustar la disposición de las bolas y obtener una distribución más representativa de la exponencial.
+
+### Problema 4: Coger los datos de los hilos y no de la base de datos
+
+**Descripción:**
+Inicialmente, los datos se obtenían directamente de la base de datos, lo que no aprovechaba la concurrencia y la capacidad de los hilos para procesar datos en tiempo real.
+
+**Solución:**
+Se revisaron y ajustaron los métodos para que los datos se obtuvieran directamente de los hilos en lugar de la base de datos, mejorando así la eficiencia y la concurrencia en la transmisión de datos.
+
+### Problema 5: Truncado de la base de datos
+
+**Descripción:**
+Cuando se truncaba la base de datos y luego se leían los datos, se seguían cargando IDs adicionales, lo que resultaba en una discrepancia entre los IDs reales en la base de datos y los IDs cargados.
+
+**Solución:**
+Se resolvió asegurándose de que la base de datos se lean primero, luego se trunque y finalmente se carguen los datos. Esto garantiza que no haya IDs adicionales cargados después del truncado.
+
+## Screenshots
+
+### Tablas Base de Datos
+![Tablas Base de Datos](JavaConEx/screenshots/1.png)
+
+### Tabla Normal
+![Tabla Normal](path/to/tabla_normal.png)
+
+### Módulo Acción
+![Módulo Acción](path/to/modulo_accion.png)
+
+### Módulo Resultados
+![Módulo Resultados](path/to/modulo_resultados.png)
+

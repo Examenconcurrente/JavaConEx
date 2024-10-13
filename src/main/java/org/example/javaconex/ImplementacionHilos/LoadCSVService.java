@@ -40,10 +40,12 @@ public class LoadCSVService {
         this.semaphore = new Semaphore(1);
     }
 
+    // Inicializa el servicio de ejecutor con un pool de hilos fijo de 10 hilos
     private void initializeExecutor() {
         this.executor = Executors.newFixedThreadPool(10);
     }
 
+    // Carga datos CSV en la tabla ValorData en la base de datos
     public void loadCSVToDatabase(String csvFile) {
         initializeExecutor();
         valorRepository.truncateTable();
@@ -79,6 +81,7 @@ public class LoadCSVService {
         }
     }
 
+    // Carga datos CSV en la tabla ExponentialData en la base de datos
     public void loadExponentialCSVToDatabase(String csvFile) {
         initializeExecutor();
         exponentialRepository.truncateTable();
@@ -114,6 +117,7 @@ public class LoadCSVService {
         }
     }
 
+    // Carga datos CSV en la tabla TStudentData en la base de datos
     public void loadTStudentCSVToDatabase(String csvFile) {
         initializeExecutor();
         tStudentRepository.truncateTable();
@@ -149,6 +153,7 @@ public class LoadCSVService {
         }
     }
 
+    // Transmite datos CSV desde la tabla ValorData al cliente usando Server-Sent Events (SSE)
     public void streamCSVData(SseEmitter emitter) {
         initializeExecutor();
         List<ValorData> valores = valorRepository.findAll();
@@ -189,6 +194,7 @@ public class LoadCSVService {
         }).start();
     }
 
+    // Transmite datos exponenciales desde la tabla ExponentialData al cliente usando Server-Sent Events (SSE)
     public void streamExponentialData(SseEmitter emitter) {
         initializeExecutor();
         List<ExponentialData> valores = exponentialRepository.findAll();
@@ -229,6 +235,7 @@ public class LoadCSVService {
         }).start();
     }
 
+    // Transmite datos de T-Student desde la tabla TStudentData al cliente usando Server-Sent Events (SSE)
     public void streamTStudentData(SseEmitter emitter) {
         initializeExecutor();
         List<TStudentData> valores = tStudentRepository.findAll();
