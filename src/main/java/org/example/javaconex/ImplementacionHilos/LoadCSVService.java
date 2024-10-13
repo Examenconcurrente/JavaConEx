@@ -8,6 +8,7 @@ import org.example.javaconex.ImplementacionBase.T.TStudentData;
 import org.example.javaconex.ImplementacionBase.T.TStudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -222,40 +223,46 @@ public class LoadCSVService {
         return output2;
     }
 
-    public List<Map<String, String>> printTStudentData() {
-        initializeExecutor();
-        List<TStudentData> valores = tStudentRepository.findAll();
-        CountDownLatch latch = new CountDownLatch(valores.size());
-        List<Map<String, String>> output3 = new ArrayList<>();
+  public void streamTStudentData(SseEmitter emitter) {
+    initializeExecutor();
+    List<TStudentData> valores = tStudentRepository.findAll();
+    CountDownLatch latch = new CountDownLatch(valores.size());
 
-        for (TStudentData valor : valores) {
-            executor.submit(() -> {
+    for (TStudentData valor : valores) {
+        executor.submit(() -> {
+            try {
+                semaphore.acquire();
+                Map<String, String> data = new HashMap<>();
+                data.put("thread", Thread.currentThread().getName());
+                data.put("id", String.valueOf(valor.getId()));
+                data.put("value", valor.getValue());
+                // Enviar datos al cliente en tiempo real
                 try {
-                    semaphore.acquire();
-                    Map<String, String> data = new HashMap<>();
-                    data.put("thread", Thread.currentThread().getName());
-                    data.put("id", String.valueOf(valor.getId()));
-                    data.put("value", valor.getValue());
-                    output3.add(data);
-                    semaphore.release();
-                } catch (InterruptedException e) {
+                    emitter.send(SseEmitter.event().data(data));
+                    // Agregar un sleep para ralentizar el envío de datos
+                    Thread.sleep(500); // 500 milisegundos de pausa entre envíos
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
                     Thread.currentThread().interrupt();
-                } finally {
-                    latch.countDown();
                 }
-            });
-        }
+                semaphore.release();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                latch.countDown();
+            }
+        });
+    }
 
+    // Cuando todo termine, cerrar el emisor
+    executor.shutdown();
+    new Thread(() -> {
         try {
             latch.await();
+            emitter.complete();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
-
-        return output3;
-    }
+    }).start();
+}
 }

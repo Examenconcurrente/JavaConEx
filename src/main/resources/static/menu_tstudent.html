@@ -13,8 +13,8 @@
 </head>
 <body>
     <svg width="1600" height="1600"></svg>
-    <div class="info" id="tstudent-hilos-info"></div>
-    <button onclick="fetchTStudentHilos()">Show T-Student Hilos</button>
+    <div class="info" id="tstudent-data-info"></div>
+    <button onclick="streamTStudentData()">Ver Hilos</button>
     <script>
         const width = 1600;
         const height = 1600;
@@ -141,10 +141,23 @@
             fetch('/tstudent-hilos')
                 .then(response => response.json())
                 .then(data => {
-                    const tstudentInfo = document.getElementById("tstudent-hilos-info");
+                    const tstudentInfo = document.getElementById("tstudent-data-info");
                     tstudentInfo.innerHTML = data.map(info => `Thread: ${info.thread}, ID: ${info.id}, Value: ${info.value}`).join('<br>');
                 })
                 .catch(error => console.error('Error fetching T-Student hilos:', error));
+        }
+
+        function streamTStudentData() {
+            const eventSource = new EventSource('/tstudent/stream');
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                const tstudentInfo = document.getElementById("tstudent-data-info");
+                tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+            };
+            eventSource.onerror = function() {
+                console.error('Error streaming T-Student data');
+                eventSource.close();
+            };
         }
 
         fetch('/tstudent')
