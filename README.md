@@ -1,1 +1,4 @@
-Inicial comit
+La velocidad de representacion de las bolas esta sujeta a la velocidad de la gravedad para que se vean mas naturales
+por ello primero agregamos el sleep en los hilos y tras pruebas vimos que con esto  los hilos se generaban demasiado perfectos leian todos los id por orden todo era demasiado perfecto, 
+por lo que decidimos agregarle en vez del sleep en los hilops el settimeout en la actualizacion de la informacion para que diese la sensacion 
+de que se genera a la vez de las bolas ya que esto no es posible porque la informacion que sacan los hilos es casi instantanea y las bolas por la gravedad antes menzonada tardan en caer.

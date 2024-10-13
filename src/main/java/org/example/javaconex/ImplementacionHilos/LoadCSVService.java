@@ -240,7 +240,7 @@ public class LoadCSVService {
                 try {
                     emitter.send(SseEmitter.event().data(data));
                     // Agregar un sleep para ralentizar el envío de datos
-                    Thread.sleep(500); // 500 milisegundos de pausa entre envíos
+                    Thread.sleep(0); // milisegundos de pausa entre envíos
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();

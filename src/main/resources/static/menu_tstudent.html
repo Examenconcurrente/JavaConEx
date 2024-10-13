@@ -9,11 +9,21 @@
         .ball { fill: red; }
         .container { fill: lightgray; }
         .info { font-family: Arial, sans-serif; font-size: 14px; margin-top: 20px; }
+        .scroll-container {
+            width: 500px; /* Increased width */
+            height: 200px; /* Decreased height */
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <svg width="1600" height="1600"></svg>
-    <div class="info" id="tstudent-data-info"></div>
+    <div class="scroll-container">
+        <div class="info" id="tstudent-data-info"></div>
+    </div>
     <button onclick="streamTStudentData()">Ver Hilos</button>
     <script>
         const width = 1600;
@@ -149,15 +159,26 @@
 
         function streamTStudentData() {
             const eventSource = new EventSource('/tstudent/stream');
+            let messageQueue = [];
             eventSource.onmessage = function(event) {
                 const data = JSON.parse(event.data);
-                const tstudentInfo = document.getElementById("tstudent-data-info");
-                tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+                messageQueue.push(data);
             };
             eventSource.onerror = function() {
                 console.error('Error streaming T-Student data');
                 eventSource.close();
             };
+
+            function processQueue() {
+                if (messageQueue.length > 0) {
+                    const data = messageQueue.shift();
+                    const tstudentInfo = document.getElementById("tstudent-data-info");
+                    tstudentInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+                }
+                setTimeout(processQueue, 20); // Adjust the delay as needed
+            }
+
+            processQueue();
         }
 
         fetch('/tstudent')
