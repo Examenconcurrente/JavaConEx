@@ -1,28 +1,41 @@
-<!-- src/main/resources/static/menu.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Galton Board Menu</title>
+    <title>Galton Board - Menus</title>
     <style>
-        .button {
-            display: block;
-            width: 200px;
-            margin: 20px auto;
-            padding: 10px;
-            font-size: 16px;
+        .menu-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+        .menu {
+            width: 30%;
+            height: 800px; /* Adjust height as needed */
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        .menu-title {
             text-align: center;
-            text-decoration: none;
-            color: white;
-            background-color: steelblue;
-            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Galton Board Menu</h1>
-    <a href="menu_normal.html" class="button">Normal Distribution</a>
-    <a href="menu_tstudent.html" class="button">T-Student Distribution</a>
-    <a href="menu_exponential.html" class="button">Exponential Distribution</a>
+    <div class="menu-container">
+        <div class="menu">
+            <div class="menu-title">Exponential Distribution</div>
+            <iframe src="menu_exponential.html" width="100%" height="100%"></iframe>
+        </div>
+        <div class="menu">
+            <div class="menu-title">Normal Distribution</div>
+            <iframe src="menu_normal.html" width="100%" height="100%"></iframe>
+        </div>
+        <div class="menu">
+            <div class="menu-title">T-Student Distribution</div>
+            <iframe src="menu_tstudent.html" width="100%" height="100%"></iframe>
+        </div>
+    </div>
 </body>
 </html>
