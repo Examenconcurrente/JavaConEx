@@ -1,0 +1,32 @@
+@startuml
+actor User
+
+participant "JavaConExApplication" as App
+participant "LoadCSVService" as CSVService
+participant "Browser" as Browser
+participant "ValorDataController" as ValorController
+participant "ValorDataService" as ValorService
+participant "ValorRepository" as ValorRepo
+
+User -> App: start()
+App -> CSVService: loadCSVToDatabase("valores_normales.csv")
+App -> CSVService: loadTStudentCSVToDatabase("valores_t_student.csv")
+App -> CSVService: loadExponentialCSVToDatabase("valores_exponenciales.csv")
+App -> Browser: openBrowser("http://localhost:8080/menu.html")
+
+User -> Browser: open URL
+Browser -> ValorController: GET /valores
+ValorController -> ValorService: getAllValores()
+ValorService -> ValorRepo: findAll()
+ValorRepo --> ValorService: List<ValorData>
+ValorService --> ValorController: List<ValorData>
+ValorController --> Browser: List<ValorData>
+
+User -> Browser: POST /valores
+Browser -> ValorController: saveValor(ValorData)
+ValorController -> ValorService: saveValor(ValorData)
+ValorService -> ValorRepo: save(ValorData)
+ValorRepo --> ValorService: ValorData
+ValorService --> ValorController: ValorData
+ValorController --> Browser: ValorData
+@enduml

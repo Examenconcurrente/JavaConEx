@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Galton Board - Normal</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .pin { fill: steelblue; }
+        .ball { fill: red; }
+        .container { fill: lightgray; }
+        .info { font-family: Arial, sans-serif; font-size: 14px; margin-top: 20px; }
+        .scroll-container {
+            width: 400px;
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            margin-left: 200px;
+        }
+        #startButton {
+            margin-left: 200px;
+        }
+    </style>
+</head>
+<body>
+<svg width="800" height="800"></svg>
+<div class="scroll-container" id="scroll-container">
+    <div class="info" id="normal-data-info"></div>
+</div>
+<button id="startButton" onclick="startSimulation()">Inicio</button>
+<script>
+    const width = 800;
+    const height = 1500;
+    const numRows = 30;
+    const pinRadius = 2.5;
+    const ballRadius = 1.5;
+    const containerHeight = 950;
+    const containerWidth = 5;
+    const gravity = 0.98;
+    const bounce = 0.6;
+    const friction = 0.01;
+
+    const svg = d3.select("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const pins = [];
+    for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col <= row; col++) {
+            pins.push({
+                x: width / 2 + (col - row / 2) * 10,
+                y: row * 10 + 25
+            });
+        }
+    }
+
+    svg.selectAll(".pin")
+        .data(pins)
+        .enter()
+        .append("circle")
+        .attr("class", "pin")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", pinRadius);
+
+    const containers = [];
+    for (let i = 0; i <= numRows; i++) {
+        containers.push({
+            x: width / 2 + (i - numRows / 2) * 10,
+            y: height - containerHeight / 2,
+            count: 0
+        });
+    }
+
+    svg.selectAll(".container")
+        .data(containers)
+        .enter()
+        .append("rect")
+        .attr("class", "container")
+        .attr("x", d => d.x - containerWidth / 2)
+        .attr("y", d => d.y - containerHeight / 2)
+        .attr("width", containerWidth)
+        .attr("height", containerHeight);
+
+    const ballData = [];
+    const allBallData = [];
+    const uniqueValues = new Set();
+
+    function dropBall(id, value) {
+        if (uniqueValues.has(value)) {
+            console.log(`Value ${value} already exists. Skipping ball ID: ${id}`);
+            return;
+        }
+
+        uniqueValues.add(value);
+
+        let x = width / 2;
+        let y = 0;
+        let vy = 0;
+        let vx = (Math.random() - 0.5) * 1;
+        const ball = svg.append("circle")
+            .attr("class", "ball")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", ballRadius)
+            .attr("data-value", value);
+
+        ballData.push({ id, value, thread: id % 10 });
+        allBallData.push({ id, value, thread: id % 10 });
+        if (ballData.length > 10) ballData.shift();
+
+        function updateBall() {
+            vy += gravity;
+            y += vy;
+            x += vx;
+
+            for (let pin of pins) {
+                const dx = x - pin.x;
+                const dy = y - pin.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < pinRadius + ballRadius) {
+                    const angle = Math.atan2(dy, dx);
+                    vx = Math.cos(angle) * bounce;
+                    vy = Math.sin(angle) * bounce;
+                    vx += (Math.random() < 0.5 ? -1 : 1) * 0.5;
+                    break;
+                }
+            }
+
+            vx *= (1 - friction);
+
+            ball.attr("cx", x).attr("cy", y);
+
+            if (y < height - containerHeight) {
+                requestAnimationFrame(updateBall);
+            } else {
+                const containerIndex = Math.floor((x - width / 2) / 10 + numRows / 2);
+                const container = containers[Math.max(0, Math.min(containerIndex, containers.length - 1))];
+                container.count += 1;
+                ball.transition()
+                    .duration(500)
+                    .attr("cx", container.x)
+                    .attr("cy", height - container.count * 2 * ballRadius - ballRadius);
+            }
+        }
+
+        updateBall();
+    }
+
+    function streamNormalData() {
+        const eventSource = new EventSource('/hilos-concurrentes');
+        let messageQueue = [];
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            messageQueue.push(data);
+        };
+        eventSource.onerror = function() {
+            console.error('Error streaming normal data');
+            eventSource.close();
+        };
+
+        function processQueue() {
+            if (messageQueue.length > 0) {
+                const data = messageQueue.shift();
+                const normalInfo = document.getElementById("normal-data-info");
+                normalInfo.innerHTML += `Thread: ${data.thread}, ID: ${data.id}, Value: ${data.value}<br>`;
+                const scrollContainer = document.getElementById("scroll-container");
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            }
+            setTimeout(processQueue, 15);
+        }
+
+        processQueue();
+    }
+
+    function startSimulation() {
+        document.getElementById("startButton").disabled = true;
+        streamNormalData();
+        fetch('/valores')
+            .then(response => response.json())
+            .then(data => {
+                Promise.all(data.map((valor, index) => {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            dropBall(index, valor.value);
+                            resolve();
+                        }, index * 20);
+                    });
+                }));
+            });
+    }
+</script>
+</body>
+</html>

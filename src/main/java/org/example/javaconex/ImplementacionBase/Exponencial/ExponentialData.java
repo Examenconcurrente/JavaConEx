@@ -1,12 +1,12 @@
-package org.example.javaconex.ImplementacionBase;
+package org.example.javaconex.ImplementacionBase.Exponencial;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "valor_data")
-public class ValorData {
+@Table(name = "exponential_data")
+public class ExponentialData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,5 +14,4 @@ public class ValorData {
 
     @Column(name = "value")
     private String value;
-
 }

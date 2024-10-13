@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Galton Board - Menus</title>
+    <style>
+        .menu-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+        .menu {
+            width: 30%;
+            height: 800px;
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        .menu-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <div class="menu">
+            <div class="menu-title">Distribución Normal</div>
+            <iframe src="menu_normal.html" width="100%" height="100%"></iframe>
+        </div>
+        <div class="menu">
+            <div class="menu-title">Distribución Exponencial</div>
+            <iframe src="menu_exponential.html" width="100%" height="100%"></iframe>
+        </div>
+        <div class="menu">
+            <div class="menu-title">Distribución T-Student</div>
+            <iframe src="menu_tstudent.html" width="100%" height="100%"></iframe>
+        </div>
+    </div>
+</body>
+</html>
